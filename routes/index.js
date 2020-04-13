@@ -2,35 +2,30 @@ const express = require('express');
 const router = express.Router();
 const Connection = require('../config/connection');
 
-
-function student() {
-  return `SELECT * FROM student`;
-}
-
-function studentById(id) {
-  return `SELECT * FROM student WHERE id_student = ${id}`;
-}
-
-function add(body) {
-  return `INSERT INTO student (nombres, apellidos, cedula)
-  VALUES ('${body.nombres}','${body.apellidos}',${body.cedula} )`;
-}
-
-function update(body, id) {
-  return `UPDATE student SET
-  nombres = '${body.nombres}', 
-  apellidos = '${body.apellidos}', 
-  cedula = ${body.cedula}
-  WHERE id_student = ${id}`;
-}
-
-function destroy(id) {
-  return `DELETE FROM student WHERE id_student = ${id}`;
+function querysDataBase(action, id, data) {
+  switch (action) {
+    case 'create':
+      query = `INSERT INTO student (nombres, apellidos, cedula) VALUES ('${data.nombres}','${data.apellidos}',${data.cedula} )`;
+      break;
+    case 'read':
+      query = `SELECT * FROM student`;
+      break;
+    case 'update':
+      query = `UPDATE student SET nombres = '${data.nombres}', apellidos = '${data.apellidos}', cedula = ${data.cedula} WHERE id = ${id}`;
+      break;
+    case 'delete':
+      query = `DELETE FROM student WHERE id = ${id}`;
+      break;
+    case 'found':
+      query = `SELECT * FROM student WHERE id = ${id}`;
+      break;
+  }
+  return query;
 }
 
 
 router.get('/student', async(req, res) => {
-  const query = student();
+  const query = querysDataBase('read', null, null);
   try {
     const Student = await Connection.query(query);
     res.status(200).json({
@@ -48,7 +43,7 @@ router.get('/student', async(req, res) => {
 
 router.get('/student/:id', async(req, res) => {
   let id =  req.params.id;
-  const query = studentById(id);
+  const query = querysDataBase('found', id, null);
   try {
     const Student = await Connection.query(query);
     res.status(200).json({
@@ -66,7 +61,7 @@ router.get('/student/:id', async(req, res) => {
 
 router.post('/student', async(req, res) => {
   const body = req.body;  
-  const query = add(body);
+  const query = querysDataBase('create', null, body);
 
   try {
     await Connection.query(query);
@@ -85,7 +80,8 @@ router.post('/student', async(req, res) => {
 router.put('/student/:id', async(req, res) => {
   let id =  req.params.id;
   const body = req.body;
-  const query = update(body, id);
+  const query = querysDataBase('update', id, body)
+
   try {
     await Connection.query(query);
     res.status(200).json({
@@ -102,7 +98,8 @@ router.put('/student/:id', async(req, res) => {
 
 router.delete('/student/:id', async(req, res) => {
   let id =  req.params.id;
-  const query = destroy(id);
+  const query = querysDataBase('delete', id, null);
+
   try {
     await Connection.query(query);
     res.status(200).json({
@@ -115,10 +112,5 @@ router.delete('/student/:id', async(req, res) => {
     })
   }
 });
-
-
-
-
-
 
 module.exports = router;
