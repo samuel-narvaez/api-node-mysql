@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 
 //Ruta Code
-const indexRoutes = require('./routes/index');
+const studentRouter = require('./routes/studentRouter');
 
 // Middleware
 app.use(morgan('tiny'));
@@ -18,7 +18,7 @@ app.set('port', process.env.PORT || 3000);
 
 
 // Rutas
-app.use('/', indexRoutes);
+app.use('/student', studentRouter);
 
 
 //Start Server
